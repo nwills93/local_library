@@ -43,6 +43,11 @@ function sorted(object) { //helper function sorts count from highest to lowest.
   object.sort((highCount, lowCount) => lowCount.count - highCount.count)
 }
 
+function sliced(array) {
+  const slicedArray = array.slice(0,5)
+  return slicedArray
+}
+
 
 function getMostPopularBooks(books) {
   //It returns an array containing five objects or fewer that represents the most popular books in the library. 
@@ -53,8 +58,7 @@ function getMostPopularBooks(books) {
     count: book.borrows.length
   }))
   sorted(topFiveBooks)
-  
-  return topFiveBooks.slice(0,5)
+  return sliced(topFiveBooks)  
 }
 
 
@@ -63,23 +67,39 @@ function getMostPopularAuthors(books, authors) {
   //Popularity is represented by finding all of the books written by the author and then adding up the number of times those books have been borrowed.
  let authorCounts = {}
  let authorList =[]
-  for (let author of authors) {
-   for (let book of books) {
-     if (author.id === book.authorId) {
-       let current = authorCounts[`${author.name.first} ${author.name.last}`]
-       if(current) {
-        authorCounts[`${author.name.first} ${author.name.last}`] = current + book.borrows.length
-       }
-       else {
-        authorCounts[`${author.name.first} ${author.name.last}`] = book.borrows.length
-       } 
-     }
-   }
- }
-for (let item in authorCounts) {
-  authorList.push({name: item, count: authorCounts[item]})
-}
- return authorList.sort((highCount, lowCount) => lowCount.count - highCount.count).slice(0, 5)
+//   for (let author of authors) {
+//    for (let book of books) {
+//      if (author.id === book.authorId) {
+//        let current = authorCounts[`${author.name.first} ${author.name.last}`]
+//        if(current) {
+//         authorCounts[`${author.name.first} ${author.name.last}`] = current + book.borrows.length
+//        }
+//        else {
+//         authorCounts[`${author.name.first} ${author.name.last}`] = book.borrows.length
+//        } 
+//      }
+//    }
+//  }
+authors.forEach(author => { //iterating through each author
+  books.map(book => { //iterating through every book
+    const {name} = author //destructuring name from author
+    const {first, last} = name //destructuring first and last name from name
+    if (author.id === book.authorId) { //if author's id matches the author id of the current book, then
+      let current = authorCounts[`${first} ${last}`] //setting a variable equal to the author's first and last name, which will be a key in the authorCounts object.
+      if(current) { //if the author already exists in authorCounts object, then
+        authorCounts[`${first} ${last}`] += book.borrows.length //add the length of the borrows array of the current book to the existing author's borrows count
+      }
+      else {
+        authorCounts[`${first} ${last}`] = book.borrows.length //otherwise, make a new key/value pair whose key is the author's name and the value is the current book's borrows length.
+      }
+    }
+  })
+})
+for (let item in authorCounts) { //iterating through every key in authorCounts
+  authorList.push({name: item, count: authorCounts[item]}) //add a new object into the authorList array. the two keys are name and count. name's value is the author's name.
+}                                                          //count's value is the author's total borrows count
+sorted(authorList) //using a helper function that will sort each authors' borrows count from highest to lowest.
+return sliced(authorList) //returns the first fives indices from the newly sorted authorList array.
 }
 
 module.exports = {
